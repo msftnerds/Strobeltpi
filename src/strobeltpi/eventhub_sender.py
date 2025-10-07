@@ -31,16 +31,18 @@ class EventHubSender:
     @retry(wait=wait_exponential_jitter(initial=1, max=30), stop=stop_after_attempt(5))
     def send_metrics(self, host_id: str, records: Iterable[dict]) -> None:
         batch = self._producer.create_batch()
+        sent_events = 0
         for r in records:
             body = {"host_id": host_id, **r}
             payload = orjson.dumps(body)
             try:
                 batch.add(EventData(body=payload))
-            except ValueError:
-                # batch full - send current and start new
+            except ValueError:  # batch full
                 self._producer.send_batch(batch)
+                sent_events += len(batch)
                 batch = self._producer.create_batch()
                 batch.add(EventData(body=payload))
-        if batch.count:  # type: ignore[attr-defined]
+        if len(batch) > 0:
             self._producer.send_batch(batch)
-        logger.info("eventhub_send_success", count=getattr(batch, "count", None))
+            sent_events += len(batch)
+        logger.info("eventhub_send_success", events=sent_events)

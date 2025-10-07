@@ -1,0 +1,14 @@
+README.md
+pyproject.toml
+src/strobeltpi/__init__.py
+src/strobeltpi/config.py
+src/strobeltpi/docker_metrics.py
+src/strobeltpi/eventhub_sender.py
+src/strobeltpi/metrics_agent.py
+src/strobeltpi_docker_metrics.egg-info/PKG-INFO
+src/strobeltpi_docker_metrics.egg-info/SOURCES.txt
+src/strobeltpi_docker_metrics.egg-info/dependency_links.txt
+src/strobeltpi_docker_metrics.egg-info/requires.txt
+src/strobeltpi_docker_metrics.egg-info/top_level.txt
+tests/test_config_bootstrap.py
+tests/test_docker_metrics.py

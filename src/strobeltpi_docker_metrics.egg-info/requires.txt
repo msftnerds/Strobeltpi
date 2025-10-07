@@ -1,0 +1,17 @@
+azure-identity>=1.17.0
+azure-keyvault-secrets>=4.8.0
+azure-eventhub>=5.12.0
+azure-keyvault-keys>=4.9.0
+azure-keyvault-certificates>=4.9.0
+docker>=7.0.0
+psutil>=5.9.8
+tenacity>=8.2.3
+orjson>=3.10.7
+structlog>=24.1.0
+
+[dev]
+pytest
+pytest-asyncio
+ruff
+mypy
+types-psutil

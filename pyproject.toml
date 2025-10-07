@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "strobeltpi-docker-metrics"
+version = "0.1.0"
+description = "Raspberry Pi 5 Docker container metrics exporter to Azure Event Hub"
+authors = [ { name = "Your Name", email = "you@example.com" } ]
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.11"
+dependencies = [
+  "azure-identity>=1.17.0",
+  "azure-keyvault-secrets>=4.8.0",
+  "azure-eventhub>=5.12.0",
+  "azure-keyvault-keys>=4.9.0",
+  "azure-keyvault-certificates>=4.9.0",
+  "docker>=7.0.0",
+  "psutil>=5.9.8",
+  "tenacity>=8.2.3",
+  "orjson>=3.10.7",
+  "structlog>=24.1.0"
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-asyncio", "ruff", "mypy", "types-psutil"]
+
+[tool.ruff]
+line-length = 100
+select = ["E", "F", "B", "I"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+
+[tool.setuptools.packages.find]
+where = ["src"]

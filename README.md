@@ -113,3 +113,6 @@ docker run -d \
 - Mounting `/var/run/docker.sock` read-only allows metrics collection without bundling Docker-in-Docker.
 - Provide secrets via Docker/Kubernetes secrets or Azure Container Apps secret references; never bake them into the image.
 - To use a certificate instead of client secret, extend the image to copy the cert and set env vars accordingly.
+- If the container shows as `unhealthy`, inspect with `docker inspect --format='{{json .State.Health}}' docker-metrics-agent`.
+	- Common reasons: process crashed (check `docker logs`), no Key Vault access (missing env), or healthcheck timing out before startup (increase start-period).
+	- You can temporarily disable the healthcheck by adding `--no-healthcheck` at run for diagnostics.

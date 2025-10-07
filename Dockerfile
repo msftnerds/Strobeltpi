@@ -38,7 +38,12 @@ RUN useradd --create-home --shell /usr/sbin/nologin appuser \
 USER appuser
 
 # Expose no ports (push model). Healthcheck ensures process alive.
-HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 CMD pgrep -f "strobeltpi.metrics_agent" || exit 1
+# Healthcheck: avoid relying on pgrep (procps) which is not in slim image.
+# Succeeds if PID 1 command line contains our module reference.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=25s --retries=3 \
+    CMD python -c "import sys; import pathlib; p=pathlib.Path('/proc/1/cmdline');\n" \
+                            "data=p.read_bytes().decode(errors='ignore') if p.exists() else '';" \
+                            "sys.exit(0 if 'strobeltpi.metrics_agent' in data else 1)" || exit 1
 
 # Required runtime environment variables (must be provided at run):
 #   KEYVAULT_URL, AZURE_TENANT_ID, AZURE_CLIENT_ID, AZURE_CLIENT_SECRET

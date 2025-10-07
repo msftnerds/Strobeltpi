@@ -38,12 +38,19 @@ RUN useradd --create-home --shell /usr/sbin/nologin appuser \
 USER appuser
 
 # Expose no ports (push model). Healthcheck ensures process alive.
-# Healthcheck: avoid relying on pgrep (procps) which is not in slim image.
-# Succeeds if PID 1 command line contains our module reference.
-HEALTHCHECK --interval=30s --timeout=5s --start-period=25s --retries=3 \
-    CMD python -c "import sys; import pathlib; p=pathlib.Path('/proc/1/cmdline');\n" \
-                            "data=p.read_bytes().decode(errors='ignore') if p.exists() else '';" \
-                            "sys.exit(0 if 'strobeltpi.metrics_agent' in data else 1)" || exit 1
+# Healthcheck: relies on heartbeat file updated every loop by the agent.
+ENV HEARTBEAT_FILE=/tmp/agent_heartbeat
+HEALTHCHECK --interval=30s --timeout=5s --start-period=35s --retries=3 \
+    CMD python -c "import os, time, sys; p=os.environ.get('HEARTBEAT_FILE','/tmp/agent_heartbeat');\n" \
+                            "\n" \
+                            "# ok if file modified within last 2 * SCRAPE_INTERVAL_SECONDS (fallback 30s).\n" \
+                            "try:\n" \
+                            "  interval=float(os.environ.get('SCRAPE_INTERVAL_SECONDS','15'));\n" \
+                            "  st=os.stat(p);\n" \
+                            "  age=time.time()-st.st_mtime;\n" \
+                            "  sys.exit(0 if age < 2*interval else 1)\n" \
+                            "except FileNotFoundError: sys.exit(1)\n" \
+                            "except Exception: sys.exit(1)" || exit 1
 
 # Required runtime environment variables (must be provided at run):
 #   KEYVAULT_URL, AZURE_TENANT_ID, AZURE_CLIENT_ID, AZURE_CLIENT_SECRET

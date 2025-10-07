@@ -116,3 +116,4 @@ docker run -d \
 - If the container shows as `unhealthy`, inspect with `docker inspect --format='{{json .State.Health}}' docker-metrics-agent`.
 	- Common reasons: process crashed (check `docker logs`), no Key Vault access (missing env), or healthcheck timing out before startup (increase start-period).
 	- You can temporarily disable the healthcheck by adding `--no-healthcheck` at run for diagnostics.
+- Healthcheck implementation: the agent writes a heartbeat timestamp to `$HEARTBEAT_FILE` (default `/tmp/agent_heartbeat`) each loop. The container is considered healthy if the file's mtime is newer than `2 * SCRAPE_INTERVAL_SECONDS`.

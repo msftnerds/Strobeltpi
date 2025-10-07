@@ -4,6 +4,7 @@ import os
 import signal
 import sys
 import time
+from pathlib import Path
 from contextlib import suppress
 
 import structlog
@@ -51,6 +52,7 @@ def main() -> int:
     signal.signal(signal.SIGTERM, _stop)
 
     interval = float(os.getenv("SCRAPE_INTERVAL_SECONDS", "15"))
+    heartbeat_path = Path(os.getenv("HEARTBEAT_FILE", "/tmp/agent_heartbeat"))
 
     logger.info("agent_started", interval_seconds=interval, host_id=cfg.metrics_host_id)
     while not shutdown:
@@ -75,6 +77,14 @@ def main() -> int:
                 sender.send_metrics(cfg.metrics_host_id, dicts)
             else:
                 logger.info("no_containers_found")
+
+            # Heartbeat update (atomic write -> rename) so healthcheck can validate recency
+            try:
+                tmp_file = heartbeat_path.with_suffix(".tmp")
+                tmp_file.write_text(str(time.time()))
+                tmp_file.replace(heartbeat_path)
+            except Exception as hb_err:  # noqa: BLE001
+                logger.warning("heartbeat_write_failed", error=str(hb_err), path=str(heartbeat_path))
         except Exception as e:  # noqa: BLE001
             logger.error("collection_or_send_failed", error=str(e))
         # sleep remaining time

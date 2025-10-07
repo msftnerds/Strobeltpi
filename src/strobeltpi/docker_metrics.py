@@ -52,7 +52,18 @@ class DockerMetricsCollector:
             try:
                 self._client = docker.from_env()
             except Exception as e:  # noqa: BLE001
-                logger.error("docker_client_init_failed", error=str(e))
+                # Surface permission guidance if likely a socket permission issue inside container
+                perm_hint = None
+                if isinstance(e, PermissionError) or "permission" in str(e).lower():
+                    perm_hint = (
+                        "Docker socket permission denied. If running in a container, add: --group-add $(stat -c '%g' /var/run/docker.sock) "
+                        "or run as a user with access to the docker socket. For quick test only: run with --user root (not recommended for prod)."
+                    )
+                logger.error(
+                    "docker_client_init_failed",
+                    error=str(e),
+                    hint=perm_hint,
+                )
                 raise
         return self._client
 

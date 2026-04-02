@@ -1,9 +1,9 @@
-# Raspberry Pi 5 Docker Metrics -> Fabric Eventstream / Azure Event Hub
+# Raspberry Pi 5 Docker Metrics -> Fabric Eventstream 
 
-Collect Docker container metrics (name, status, uptime, cpu %, memory, disk IO read/write) on a Raspberry Pi 5 and stream them securely to Fabric Eventstream / Azure Event Hub using Azure AD (Service Principal) and Azure Key Vault for secret management.
+Collect Docker container metrics (name, status, uptime, cpu %, memory, disk IO read/write) on a Raspberry Pi 5 and stream them securely to Fabric Eventstream using Azure AD (Service Principal) and Azure Key Vault for secret management.
 
 ## Security Principles (Microsoft Security Foundation)
-- Least privilege: Service Principal granted only `get` on required Key Vault secrets and `Fabric Eventstream / Azure Event Hubs Data Sender` on the target Event Hub.
+- Least privilege: Service Principal granted only `get` on required Key Vault secrets and `Fabric Eventstream s Data Sender` on the target Event Hub.
 - No credentials in code or repo. All sensitive values stored as Key Vault secrets.
 - Encrypted transport only (HTTPS / AMQP over TLS). SDK defaults enforce TLS.
 - Rotatable secrets: Rotate SP client secret/cert; update Key Vault and restart service.
@@ -14,6 +14,9 @@ Collect Docker container metrics (name, status, uptime, cpu %, memory, disk IO r
 2. Metrics serialized to compact JSON (orjson) with timestamp + host identity.
 3. Event batch sent with `EventHubProducerClient` using `ClientSecretCredential` (or certificate) obtained from Key Vault.
 4. Retry (tenacity) with exponential backoff and jitter for transient failures.
+5. Read data through Event Stream and store them in Fabric Eventhouse
+6. Set Data Activator for status change if docker container is not running for more than 10 minutes (inform user through teams message)
+7. Show results in Fabric Real-Time Dashboard
 
 ## Key Vault Secrets (expected names)
 - `event-hub-fully-qualified-namespace` (e.g. `mynamespace.servicebus.windows.net`)

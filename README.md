@@ -18,6 +18,9 @@ Collect Docker container metrics (name, status, uptime, cpu %, memory, disk IO r
 6. Set Data Activator for status change if docker container is not running for more than 10 minutes (inform user through teams message)
 7. Show results in Fabric Real-Time Dashboard
 
+<img width="1261" height="497" alt="image" src="https://github.com/user-attachments/assets/742dc735-06b2-46c3-8335-fae9c50963dd" />
+
+
 ## Key Vault Secrets (expected names)
 - `event-hub-fully-qualified-namespace` (e.g. `mynamespace.servicebus.windows.net`)
 - `event-hub-name`
